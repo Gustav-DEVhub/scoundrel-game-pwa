@@ -1,5 +1,5 @@
-const APP_CACHE = 'scoundrel-app-v1'
-const RUNTIME_CACHE = 'scoundrel-runtime-v1'
+const APP_CACHE = 'scoundrel-app-v2'
+const RUNTIME_CACHE = 'scoundrel-runtime-v2'
 
 const PRECACHE_URLS = [
   '/',
@@ -7,7 +7,10 @@ const PRECACHE_URLS = [
   '/manifest.webmanifest',
   '/assets/index.css',
   '/assets/index.js',
-  '/icons/scoundrel-icon.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/screenshots/scoundrel-mobile.png',
+  '/screenshots/scoundrel-desktop.png',
   '/scoundrel/index.html',
   '/scoundrel/style.css',
   '/scoundrel/js/achievements.js',
