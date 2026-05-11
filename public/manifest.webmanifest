@@ -1,0 +1,25 @@
+{
+  "name": "Scoundrel",
+  "short_name": "Scoundrel",
+  "description": "A solo dungeon-crawl card game that works offline as a progressive web app.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#120e0b",
+  "theme_color": "#120e0b",
+  "icons": [
+    {
+      "src": "/icons/scoundrel-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/scoundrel-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

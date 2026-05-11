@@ -1,0 +1,2310 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SCOUNDREL — Main Stylesheet
+   Sections:
+     1. Custom Properties (theme tokens)
+     2. Reset & Base
+     3. Skip Link & Accessibility Utilities
+     4. App Layout
+     5. HUD
+     6. Room Grid
+     7. Card (face-down / face-up / types)
+     8. Card Flip Animation
+     9. Action Log
+    10. Buttons
+    11. Overlays & Dialogs
+    12. Help Modal
+    13. End-game Dialog
+    14. Responsive Breakpoints
+    15. prefers-reduced-motion overrides
+═══════════════════════════════════════════════════════════════════ */
+
+
+/* ───────────────────────────────────────────────────────────────
+   1. CUSTOM PROPERTIES
+─────────────────────────────────────────────────────────────────*/
+:root {
+  /* Palette */
+  --clr-bg:            #0f1117;
+  --clr-surface:       #1a1d27;
+  --clr-surface-2:     #22263a;
+  --clr-surface-3:     #2c3050;
+  --clr-border:        #3a3f5c;
+  --clr-border-light:  #4e5478;
+
+  --clr-text:          #e8eaf6;
+  --clr-text-muted:    #8891b8;
+  --clr-text-dim:      #555e82;
+
+  /* Accent – dungeon gold */
+  --clr-accent:        #f5c842;
+  --clr-accent-dim:    #c49e28;
+  --clr-accent-glow:   rgba(245, 200, 66, 0.25);
+
+  /* Card type colours */
+  --clr-monster:       #c0392b;
+  --clr-monster-bg:    #2a0d0d;
+  --clr-monster-border:#7a1818;
+  --clr-monster-glow:  rgba(192, 57, 43, 0.35);
+
+  --clr-weapon:        #2980b9;
+  --clr-weapon-bg:     #0a1a2a;
+  --clr-weapon-border: #1a5f8a;
+  --clr-weapon-glow:   rgba(41, 128, 185, 0.35);
+
+  --clr-potion:        #27ae60;
+  --clr-potion-bg:     #0a1f12;
+  --clr-potion-border: #1a7a40;
+  --clr-potion-glow:   rgba(39, 174, 96, 0.35);
+
+  --clr-card-back:     #1e2240;
+
+  /* Health bar */
+  --clr-hp-high:       #2ecc71;
+  --clr-hp-mid:        #f39c12;
+  --clr-hp-low:        #e74c3c;
+
+  /* Status */
+  --clr-danger:        #e74c3c;
+  --clr-warn:          #f39c12;
+  --clr-ok:            #2ecc71;
+  --clr-info:          #3498db;
+
+  /* Spacing scale */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+
+  /* Typography */
+  --font-sans:   'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono:   'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  --font-title:  Georgia, 'Times New Roman', serif;
+
+  --fs-xs:   0.7rem;
+  --fs-sm:   0.8rem;
+  --fs-base: 1rem;
+  --fs-md:   1.125rem;
+  --fs-lg:   1.35rem;
+  --fs-xl:   1.75rem;
+  --fs-2xl:  2.5rem;
+
+  /* Radii */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-pill:9999px;
+
+  /* Shadows */
+  --shadow-card:  0 4px 16px rgba(0,0,0,0.55);
+  --shadow-panel: 0 2px 10px rgba(0,0,0,0.4);
+  --shadow-glow-accent: 0 0 14px var(--clr-accent-glow);
+
+  /* Transitions */
+  --dur-fast:   120ms;
+  --dur-base:   220ms;
+  --dur-slow:   380ms;
+  --dur-flip:   260ms;
+  --ease-out:   cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring:cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Layout */
+  --hud-height: 72px;
+  --card-w:     180px;
+  --card-h:     calc(var(--card-w) * 4 / 3); /* exact 3:4 ratio, always in sync */
+  --card-gap:   var(--sp-5);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   2. RESET & BASE
+─────────────────────────────────────────────────────────────────*/
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:      var(--font-sans);
+  font-size:        var(--fs-base);
+  background-color: var(--clr-bg);
+  color:            var(--clr-text);
+  line-height:      1.5;
+  min-height:       100dvh;
+  overflow-x:       hidden;
+  overflow-y:       hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  font-family: var(--font-title);
+  color:       var(--clr-text);
+}
+
+p, li, dd, dt { font-size: var(--fs-base); }
+
+ul, ol { list-style: none; }
+
+button {
+  font-family: inherit;
+  cursor:      pointer;
+  border:      none;
+  background:  none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   3. SKIP LINK & ACCESSIBILITY UTILITIES
+─────────────────────────────────────────────────────────────────*/
+.skip-link {
+  position:   absolute;
+  top:        -9999px;
+  left:       var(--sp-4);
+  z-index:    9999;
+  background: var(--clr-accent);
+  color:      #000;
+  padding:    var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  text-decoration: none;
+  transition: top var(--dur-fast);
+}
+.skip-link:focus {
+  top: var(--sp-4);
+}
+
+/* Screen-reader only */
+.sr-only {
+  position:   absolute;
+  width:      1px;
+  height:     1px;
+  padding:    0;
+  margin:     -1px;
+  overflow:   hidden;
+  clip:       rect(0,0,0,0);
+  white-space: nowrap;
+  border:     0;
+}
+
+/* Focus-visible ring */
+:focus-visible {
+  outline:        2px solid var(--clr-accent);
+  outline-offset: 3px;
+  border-radius:  var(--radius-sm);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   4. APP LAYOUT
+─────────────────────────────────────────────────────────────────*/
+.app {
+  display:        flex;
+  flex-direction: column;
+  height:         100dvh;   /* constrain chain so .log-scroll can scroll */
+  max-width:      1100px;
+  margin-inline:  auto;
+  padding-inline: var(--sp-4);
+  overflow:       hidden;   /* clip anything that escapes on desktop */
+}
+
+#main-content {
+  flex:       1;
+  min-height: 0;           /* allow flex to shrink below content size */
+  display: flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:     var(--sp-1);   /* tight: cards hug the HUD */
+  padding-block-start: 0;
+  padding-block-end:   var(--sp-4);
+  width: 100%;
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   5. HUD
+─────────────────────────────────────────────────────────────────*/
+.hud {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-2);
+  padding:        var(--sp-3) var(--sp-4);
+  background:     var(--clr-surface);
+  border-bottom:  1px solid var(--clr-border);
+  position:       sticky;
+  top:            0;
+  z-index:        100;
+  box-shadow:     var(--shadow-panel);
+}
+
+/* Title row — game name on the left, toggle button on the right */
+.hud-title-row {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  width:           100%;
+}
+
+.hud-title {
+  font-size:      var(--fs-lg);
+  font-weight:    800;
+  color:          var(--clr-text);
+  letter-spacing: 0.02em;
+}
+
+/* Toggle button — visible on all screen sizes, isolated in title row */
+.btn-hud-toggle {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           28px;
+  height:          28px;
+  border-radius:   var(--radius-sm);
+  font-size:       var(--fs-xs);
+  color:           var(--clr-text-muted);
+  background:      var(--clr-surface-2);
+  border:          1px solid var(--clr-border);
+  transition:      transform var(--dur-fast), background var(--dur-fast);
+  flex-shrink:     0;
+}
+.btn-hud-toggle:hover {
+  background: var(--clr-border);
+  color:      var(--clr-text);
+}
+.btn-hud-toggle[aria-expanded="true"] {
+  transform: rotate(180deg);
+}
+
+.hud-block {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-2);
+}
+
+.hud-label {
+  font-size:      var(--fs-xs);
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+}
+
+.hud-value {
+  font-size:   var(--fs-sm);
+  font-weight: 600;
+  color:       var(--clr-text);
+}
+
+.hud-sub {
+  font-size:  var(--fs-xs);
+  color:      var(--clr-text-muted);
+}
+.hud-sub-value {
+  font-size:   var(--fs-sm);
+  color:       var(--clr-text);
+  font-weight: 600;
+}
+
+/* ── Health block ── */
+.hud-health {
+  width:          100%;
+  flex-direction: column;
+  align-items:    stretch;
+  gap:            var(--sp-1);
+}
+
+.health-bar-track {
+  width:         100%;
+  height:        1.6rem;
+  background:    var(--clr-surface-3);
+  border-radius: var(--radius-pill);
+  overflow:      hidden;
+  border:        1px solid var(--clr-border);
+  position:      relative;   /* host for the value overlay */
+}
+
+.health-bar-fill {
+  height:           100%;
+  width:            100%;
+  background:       var(--clr-hp-high);
+  border-radius:    var(--radius-pill);
+  transform-origin: left center;
+  transition:       width var(--dur-slow) var(--ease-out),
+                    background-color var(--dur-base);
+}
+.health-bar-fill.hp-mid { background: var(--clr-hp-mid); }
+.health-bar-fill.hp-low { background: var(--clr-hp-low);
+                           animation: pulse-low 1.2s infinite; }
+
+/* Health value — centred text overlaid on the bar */
+#health-value {
+  position:        absolute;
+  inset:           0;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       var(--fs-xs);
+  font-weight:     700;
+  color:           #fff;
+  text-shadow:     0 1px 3px rgba(0,0,0,.6);
+  z-index:         1;
+  pointer-events:  none;
+  min-width:       unset;
+}
+
+@keyframes pulse-low {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+/* ── Stats row — weapon + turn/deck/discard in one line ── */
+.hud-stats-row {
+  display: flex;
+  gap:     var(--sp-2);
+  width:   100%;
+}
+
+/* Weapon block — compact pill */
+.hud-weapon {
+  flex:            1;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             var(--sp-1);
+  background:      var(--clr-surface-2);
+  border:          1px solid var(--clr-border);
+  border-radius:   var(--radius-md);
+  padding:         var(--sp-2) var(--sp-2);
+  min-width:       0;
+}
+
+/* Strip inner bg/border — the outer pill is the container */
+.weapon-display {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-1);
+}
+.weapon-suit  { color: var(--clr-weapon); font-size: var(--fs-sm); }
+.weapon-value { color: var(--clr-text);   font-size: var(--fs-sm); font-weight: 700; }
+
+/* Hide "Last defeated" in the compact pill */
+.hud-weapon .hud-sub,
+.hud-weapon .hud-sub-value { display: none; }
+
+/* No weapon equipped */
+.weapon-display.no-weapon .weapon-suit,
+.weapon-display.no-weapon .weapon-value {
+  color: var(--clr-text-dim);
+}
+
+/* Stats info: fills remaining space */
+.hud-info {
+  flex:      3;
+  min-width: 0;
+}
+
+/* Stats dl — row of pills */
+.hud-stats {
+  display: flex;
+  gap:     var(--sp-2);
+  flex:    1;
+  width:   100%;
+}
+.stat-row {
+  flex:            1;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  background:      var(--clr-surface-2);
+  border:          1px solid var(--clr-border);
+  border-radius:   var(--radius-md);
+  padding:         var(--sp-1) var(--sp-2);
+  min-width:       0;
+}
+.stat-row dt {
+  font-size:      var(--fs-xs);
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color:          var(--clr-text-muted);
+}
+.stat-row dd {
+  font-size:   var(--fs-md);
+  font-weight: 700;
+  color:       var(--clr-accent);
+  font-family: var(--font-mono);
+}
+
+/* Controls — hidden by default, revealed by toggle */
+.hud-controls {
+  display:     none;
+  gap:         var(--sp-2);
+  flex-wrap:   wrap;
+  width:       100%;
+  padding-top: var(--sp-2);
+  border-top:  1px solid var(--clr-border);
+}
+.hud-controls.is-open {
+  display: flex;
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   6. ROOM GRID
+─────────────────────────────────────────────────────────────────*/
+.room-section {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--sp-2);
+  width:          100%;
+}
+
+.room-grid {
+  display:               grid;
+  grid-template-columns: repeat(4, var(--card-w));
+  grid-template-rows:    var(--card-h); /* lock row height — never influenced by cell content */
+  gap:                   var(--card-gap);
+  justify-content:       center;
+  flex-shrink:           0;
+}
+
+/* Notices */
+.avoid-notice,
+.potion-notice {
+  font-size:   var(--fs-sm);
+  font-weight: 600;
+  padding:     var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-pill);
+  text-align:    center;
+  transition:  opacity var(--dur-base) var(--ease-out);
+}
+/* Collapse notices to zero height when hidden — minor layout shift on appear is acceptable.
+   Old approach (visibility:hidden, full height reserved) caused excessive blank space. */
+.avoid-notice[hidden],
+.potion-notice[hidden] {
+  display:        block !important;
+  visibility:     hidden;
+  opacity:        0;
+  pointer-events: none;
+  /* Keep the box in flow at its natural height — no shift when it appears/disappears */
+  margin:         0;
+}
+.avoid-notice {
+  background: color-mix(in srgb, var(--clr-warn) 15%, transparent);
+  color:      var(--clr-warn);
+  border:     1px solid color-mix(in srgb, var(--clr-warn) 35%, transparent);
+}
+.potion-notice {
+  background: color-mix(in srgb, var(--clr-potion) 12%, transparent);
+  color:      var(--clr-potion);
+  border:     1px solid color-mix(in srgb, var(--clr-potion) 30%, transparent);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   7. CARD – SLOT, FACE-DOWN, FACE-UP, TYPES
+─────────────────────────────────────────────────────────────────*/
+
+/* Slot: perspective container */
+.card-slot {
+  width:       var(--card-w);
+  height:      var(--card-h);
+  min-width:   var(--card-w);
+  min-height:  var(--card-h);
+  max-width:   var(--card-w);
+  max-height:  var(--card-h);
+  flex-shrink: 0;
+  perspective: 900px;
+  position:    relative;
+  list-style:  none;
+  box-sizing:  border-box;
+  /* NOTE: no overflow:hidden here — it breaks preserve-3d perspective rendering */
+}
+
+/* Inner flipper */
+.card-inner {
+  position:         relative;
+  width:            100%;
+  height:           100%;
+  transform-style:  preserve-3d;
+  transition:       transform var(--dur-flip) var(--ease-out);
+  border-radius:    var(--radius-lg);
+}
+.card-slot.is-flipped .card-inner {
+  transform: rotateY(180deg);
+}
+/* Mid-room re-render: card was already face-up → snap instantly, no transition flash */
+.card-slot.is-instant-flip .card-inner {
+  transition: none;
+}
+
+/* Both faces share base styles */
+.card-face {
+  position:      absolute;
+  inset:         0;
+  width:         100%;  /* explicit fallback for 3d context */
+  height:        100%;
+  border-radius: var(--radius-lg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display:       flex;
+  flex-direction:column;
+  align-items:   center;
+  justify-content: center;
+  overflow:      hidden;
+  box-shadow:    var(--shadow-card);
+  user-select:   none;
+}
+
+/* ── Back face ── */
+.card-back {
+  background:  var(--clr-card-back);
+  border:      1px solid var(--clr-border-light);
+}
+
+.card-back::before {
+  content:  '';
+  position: absolute;
+  inset:    6px;
+  border:   1px solid var(--clr-border-light);
+  border-radius: calc(var(--radius-lg) - 4px);
+  opacity:  0.5;
+}
+
+/* Decorative back pattern */
+.card-back::after {
+  content:     '✦';
+  font-size:   2.5rem;
+  color:       var(--clr-border-light);
+  opacity:     0.5;
+}
+
+/* ── Front face ── */
+.card-front {
+  transform:  rotateY(180deg);
+  padding:    var(--sp-3);
+  border:     2px solid;
+  position:   relative;
+  gap:        var(--sp-2);
+  cursor:     pointer;
+  /* Background image support */
+  background-size:     cover;
+  background-position: center;
+  background-repeat:   no-repeat;
+}
+
+/*
+ * Dark gradient overlay so rank/suit text stays legible
+ * over any card background image.
+ */
+.card-front::before {
+  content:       '';
+  position:      absolute;
+  inset:         0;
+  border-radius: inherit;
+  background:    linear-gradient(
+    160deg,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.20) 50%,
+    rgba(0,0,0,0.55) 100%
+  );
+  z-index:       0;
+  pointer-events:none;
+}
+
+/* All direct children of .card-front must sit above the overlay */
+.card-front > * {
+  position: relative;
+  z-index:  1;
+}
+
+/* Top-left rank+suit */
+.card-tl {
+  position:       absolute;
+  top:            var(--sp-2);
+  left:           var(--sp-2);
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  line-height:    1;
+  background:     rgba(0,0,0,0.55);
+  border-radius:  var(--radius-sm);
+  padding:        2px 5px;
+  min-width:      1.6rem;
+}
+/* Bottom-right rank+suit (rotated) */
+.card-br {
+  position:       absolute;
+  bottom:         var(--sp-2);
+  right:          var(--sp-2);
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  line-height:    1;
+  transform:      rotate(180deg);
+  background:     rgba(0,0,0,0.55);
+  border-radius:  var(--radius-sm);
+  padding:        2px 5px;
+  min-width:      1.6rem;
+}
+
+.card-rank {
+  font-size:   var(--fs-md);
+  font-weight: 800;
+  font-family: var(--font-mono);
+  line-height: 1;
+  color:       #fff;
+}
+.card-suit-small {
+  font-size:   var(--fs-xs);
+  line-height: 1;
+  opacity:     0.85;
+  color:       #fff;
+}
+
+/* Center suit pip — reduced opacity when a background image is present */
+.card-center-suit {
+  font-size: 4rem;
+  line-height: 1;
+  opacity:   0.35;
+}
+
+/* Card type colour sets.
+ * Use background-color (NOT the background shorthand) so
+ * the inline background-image set by JS is never overridden. */
+.card-slot--monster .card-front {
+  background-color: var(--clr-monster-bg);
+  border-color:     var(--clr-monster-border);
+  color:            var(--clr-monster);
+}
+.card-slot--monster .card-front:hover,
+.card-slot--monster .card-front:focus-visible {
+  border-color: var(--clr-monster);
+  box-shadow:   0 0 18px var(--clr-monster-glow), var(--shadow-card);
+}
+
+.card-slot--weapon .card-front {
+  background-color: var(--clr-weapon-bg);
+  border-color:     var(--clr-weapon-border);
+  color:            var(--clr-weapon);
+}
+.card-slot--weapon .card-front:hover,
+.card-slot--weapon .card-front:focus-visible {
+  border-color: var(--clr-weapon);
+  box-shadow:   0 0 18px var(--clr-weapon-glow), var(--shadow-card);
+}
+
+.card-slot--potion .card-front {
+  background-color: var(--clr-potion-bg);
+  border-color:     var(--clr-potion-border);
+  color:            var(--clr-potion);
+}
+.card-slot--potion .card-front:hover,
+.card-slot--potion .card-front:focus-visible {
+  border-color: var(--clr-potion);
+  box-shadow:   0 0 18px var(--clr-potion-glow), var(--shadow-card);
+}
+
+/* Selected card — lifted and glowing */
+.card-slot.is-selected .card-front {
+  transform:   rotateY(180deg) translateY(-10px);
+  box-shadow:  0 0 0 3px var(--clr-accent),
+               0 0 24px var(--clr-accent-glow),
+               var(--shadow-card);
+  border-color: var(--clr-accent);
+  transition:  transform var(--dur-base) var(--ease-spring),
+               box-shadow var(--dur-base) var(--ease-out);
+}
+
+/* Disabled / resolved card */
+.card-slot.is-resolved .card-front {
+  opacity:   0.35;
+  cursor:    not-allowed;
+  pointer-events: none;
+  filter:    grayscale(80%);
+}
+
+/* Carried-forward card accent */
+.card-slot.is-carried .card-back::after {
+  content:   '◈';
+  color:     var(--clr-accent);
+  opacity:   0.9;
+}
+
+/* Carried-forward badge (shown on the front face of the carried card) */
+.carried-badge {
+  position:       absolute;
+  top:            var(--sp-2);
+  right:          var(--sp-2);
+  background:     var(--clr-accent-glow);
+  border:         1px solid var(--clr-accent-dim);
+  border-radius:  var(--radius-pill);
+  color:          var(--clr-accent);
+  font-size:      var(--fs-xs);
+  font-weight:    700;
+  padding:        1px 5px;
+  pointer-events: none;
+  white-space:    nowrap;
+}
+
+/* Empty slot — IDENTICAL box to .card-slot; grid row never shifts */
+.card-slot--empty {
+  width:        var(--card-w);
+  height:       var(--card-h);
+  min-width:    var(--card-w);
+  min-height:   var(--card-h);
+  max-width:    var(--card-w);
+  max-height:   var(--card-h);
+  flex-shrink:  0;
+  box-sizing:   border-box;
+  background-color: var(--clr-surface-2);
+  border:       2px dashed var(--clr-border);
+  border-radius: var(--radius-lg);
+  opacity:      0.35;
+  perspective:  none;
+}
+
+/* Slot number badge */
+.card-slot-number {
+  position:     absolute;
+  top:          -var(--sp-2);
+  left:         50%;
+  transform:    translateX(-50%);
+  background:   var(--clr-surface-3);
+  border:       1px solid var(--clr-border);
+  border-radius:var(--radius-pill);
+  font-size:    var(--fs-xs);
+  padding:      1px 6px;
+  color:        var(--clr-text-muted);
+  z-index:      2;
+  pointer-events: none;
+}
+
+/* Card type label */
+.card-type-label {
+  font-size:      var(--fs-xs);
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity:        0.7;
+  margin-top:     auto;
+}
+
+/* Tooltip-like damage preview — shown via JS aria-label, visual only */
+.card-damage-tip {
+  position:     absolute;
+  bottom:       -26px;
+  left:         50%;
+  transform:    translateX(-50%);
+  background:   var(--clr-surface-3);
+  border:       1px solid var(--clr-border);
+  border-radius:var(--radius-sm);
+  font-size:    var(--fs-xs);
+  padding:      2px 6px;
+  white-space:  nowrap;
+  pointer-events: none;
+  opacity:      0;
+  transition:   opacity var(--dur-fast);
+  z-index:      10;
+}
+.card-slot:hover .card-damage-tip,
+.card-slot:focus-within .card-damage-tip {
+  opacity: 1;
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   8. CARD FLIP ANIMATION ENTRY
+─────────────────────────────────────────────────────────────────*/
+/* Deal drop-in — cards dealt one by one with a slight throw rotation per card */
+@keyframes card-deal {
+  0%   { opacity: 0; transform: translateY(-52px) scale(0.78) rotate(var(--deal-rot-start, -5deg)); }
+  68%  { opacity: 1; transform: translateY(5px)   scale(1.04) rotate(var(--deal-rot-end,   0.5deg)); }
+  100% { opacity: 1; transform: translateY(0)     scale(1)    rotate(0deg); }
+}
+.card-slot.is-dealing.is-new-deal {
+  animation: card-deal 340ms var(--ease-spring) both;
+}
+/* Per-card stagger + fan rotation (left cards tilt left, right cards tilt right) */
+.card-slot.is-dealing.is-new-deal:nth-child(1) { animation-delay:   0ms; --deal-rot-start: -6deg; --deal-rot-end:  0.6deg; }
+.card-slot.is-dealing.is-new-deal:nth-child(2) { animation-delay:  60ms; --deal-rot-start: -2deg; --deal-rot-end:  0.2deg; }
+.card-slot.is-dealing.is-new-deal:nth-child(3) { animation-delay: 120ms; --deal-rot-start:  2deg; --deal-rot-end: -0.2deg; }
+.card-slot.is-dealing.is-new-deal:nth-child(4) { animation-delay: 180ms; --deal-rot-start:  6deg; --deal-rot-end: -0.6deg; }
+
+/* Flip reveal — pauses at 90° so the card face and image fully render before becoming visible */
+@keyframes card-flip-reveal {
+  0%   { transform: rotateY(0deg);   }
+  35%  { transform: rotateY(90deg);  }  /* reaches edge        */
+  55%  { transform: rotateY(90deg);  }  /* holds — image loads */
+  90%  { transform: rotateY(186deg); }  /* slight overshoot    */
+  100% { transform: rotateY(180deg); }
+}
+.card-slot.is-new-deal.is-flipped .card-inner {
+  transition: none;
+  animation:  card-flip-reveal 420ms cubic-bezier(0.35, 0, 0.25, 1) both;
+}
+.card-slot.is-new-deal.is-flipped:nth-child(1) .card-inner { animation-delay:   0ms; }
+.card-slot.is-new-deal.is-flipped:nth-child(2) .card-inner { animation-delay:  90ms; }
+.card-slot.is-new-deal.is-flipped:nth-child(3) .card-inner { animation-delay: 180ms; }
+.card-slot.is-new-deal.is-flipped:nth-child(4) .card-inner { animation-delay: 270ms; }
+
+/* Reset (exit) — smooth fade-out downward */
+@keyframes card-reset {
+  0%   { opacity: 1; transform: translateY(0)    scale(1);    }
+  100% { opacity: 0; transform: translateY(14px) scale(0.90); }
+}
+.card-slot.is-resetting {
+  animation: card-reset 240ms var(--ease-out) both;
+  pointer-events: none;
+}
+.card-slot.is-resetting .card-inner {
+  transform: rotateY(0deg);
+  transition: transform 200ms var(--ease-out);
+}
+
+/* Resolve */
+.card-slot.is-resolving { animation: none; }
+.card-slot.is-resolving .card-inner {
+  transform: rotateY(0deg);
+  transition: transform 160ms var(--ease-out);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   9. ACTION LOG
+─────────────────────────────────────────────────────────────────*/
+/* Avoid button bar — close under the card grid */
+.avoid-bar {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             var(--sp-2);
+  padding:         0 0 var(--sp-1);  /* no top padding — buttons sit flush under cards */
+  /* Stable height: prevent layout shifts when button states or hints change */
+  width:           100%;
+  flex-shrink:     0;
+}
+
+/* Button row inside the avoid-bar */
+.action-bar-buttons {
+  display:     flex;
+  gap:         var(--sp-3);
+  align-items: center;
+  flex-wrap:   wrap;
+  justify-content: center;
+}
+
+/* Instruction hint — now shown BELOW the action buttons */
+.room-hint {
+  font-size:   var(--fs-xs);
+  color:       var(--clr-text-dim);
+  text-align:  center;
+  margin:      0;
+  line-height: 1.4;
+  opacity:     0.8;
+  /* Reserve space even when empty — prevents vertical layout shift */
+  min-height:  calc(var(--fs-xs) * 1.4);
+}
+.room-hint strong {
+  color:       var(--clr-text);
+  font-weight: 700;
+}
+
+.log-section {
+  display:         flex;
+  flex-direction:  column;
+  gap:             var(--sp-2);
+  flex:            1;          /* fills all remaining vertical space */
+  min-height:      0;          /* allows flex child to shrink below content size */
+  width:           100%;
+}
+
+.log-heading {
+  font-size:      var(--fs-sm);
+  font-family:    var(--font-sans);
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+  padding-bottom: var(--sp-1);
+  border-bottom:  1px solid var(--clr-border);
+}
+
+.log-scroll {
+  flex:       1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--clr-surface-2);
+  border:     1px solid var(--clr-border-light);
+  border-radius: var(--radius-md);
+  padding:    var(--sp-3) var(--sp-4) var(--sp-3) calc(var(--sp-4) + 2px);
+  font-family:var(--font-mono);
+  font-size:  var(--fs-sm);
+  scroll-behavior: smooth;
+  /* Themed scrollbar — gold accent on dark surface */
+  scrollbar-width: thin;
+  scrollbar-color: var(--clr-accent-dim) var(--clr-surface-3);
+}
+/* WebKit scrollbar — more visible, dungeon-flavoured */
+.log-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.log-scroll::-webkit-scrollbar-track {
+  background:    var(--clr-surface-3);
+  border-radius: var(--radius-pill);
+  border:        1px solid var(--clr-border);
+}
+.log-scroll::-webkit-scrollbar-thumb {
+  background:    var(--clr-accent-dim);
+  border-radius: var(--radius-pill);
+  border:        2px solid var(--clr-surface-3);
+  transition:    background var(--dur-fast);
+}
+.log-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-accent);
+}
+
+.log-list {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-1);
+}
+
+.log-entry {
+  padding:        2px 0;
+  border-bottom:  1px solid var(--clr-surface-2);
+  color:          var(--clr-text-muted);
+  transition:     color var(--dur-fast);
+}
+.log-entry:last-child {
+  border-bottom: none;
+  color:         var(--clr-text);
+}
+
+/* Entry types */
+.log-entry.log-system  { color: var(--clr-text-dim); font-style: italic; }
+.log-entry.log-damage  { color: var(--clr-monster); }
+.log-entry.log-heal    { color: var(--clr-potion); }
+.log-entry.log-equip   { color: var(--clr-weapon); }
+.log-entry.log-avoid   { color: var(--clr-warn); }
+.log-entry.log-win     { color: var(--clr-ok); font-weight: 700; }
+.log-entry.log-lose    { color: var(--clr-danger); font-weight: 700; }
+
+/* Turn divider — full-width ruled separator between turns */
+.log-turn-divider {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-2);
+  margin-block: var(--sp-3) var(--sp-1);
+  pointer-events: none;
+  list-style:  none;
+}
+.log-turn-divider::before,
+.log-turn-divider::after {
+  content:    '';
+  flex:       1;
+  height:     1px;
+  background: var(--clr-border);
+}
+.log-turn-label {
+  font-size:      var(--fs-xs);
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--clr-accent-dim);
+  white-space:    nowrap;
+  padding-inline: var(--sp-1);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   10. BUTTONS
+─────────────────────────────────────────────────────────────────*/
+.btn {
+  display:        inline-flex;
+  align-items:    center;
+  justify-content:center;
+  gap:            var(--sp-1);
+  padding:        var(--sp-2) var(--sp-4);
+  border-radius:  var(--radius-md);
+  font-size:      var(--fs-sm);
+  font-weight:    600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition:     background-color var(--dur-fast),
+                  color            var(--dur-fast),
+                  box-shadow       var(--dur-fast),
+                  opacity          var(--dur-fast),
+                  transform        var(--dur-fast);
+  white-space:  nowrap;
+  position:     relative; /* needed for ripple */
+  overflow:     hidden;   /* needed for ripple */
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-primary {
+  background: var(--clr-accent);
+  color:      #0f1117;
+}
+.btn-primary:hover  { background: #ffd160; box-shadow: 0 0 10px var(--clr-accent-glow); }
+.btn-primary:active { background: var(--clr-accent-dim); }
+
+.btn-secondary {
+  background: var(--clr-surface-3);
+  color:      var(--clr-text);
+  border:     1px solid var(--clr-border);
+}
+.btn-secondary:hover  { background: var(--clr-border); }
+
+.btn-avoid {
+  background: var(--clr-surface-2);
+  color:      var(--clr-warn);
+  border:     1px solid color-mix(in srgb, var(--clr-warn) 40%, transparent);
+  position:   relative;
+}
+.btn-avoid:hover { background: color-mix(in srgb, var(--clr-warn) 20%, transparent); }
+.btn-avoid[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor:  not-allowed;
+  pointer-events: none;
+}
+
+/* Face Selected button */
+.btn-face {
+  background: var(--clr-surface-2);
+  color:      var(--clr-text-muted);
+  border:     1px solid var(--clr-border);
+  min-width:  11rem;
+  transition: background var(--dur-base) var(--ease-out),
+              color      var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.btn-face:disabled {
+  opacity: 0.5;
+  cursor:  not-allowed;
+}
+/* Fully selected — emerald green, matches --clr-ok / --clr-potion palette */
+.btn-face.is-ready {
+  background:  var(--clr-potion-bg);
+  color:       var(--clr-ok);
+  border-color: var(--clr-potion-border);
+  font-weight: 700;
+  box-shadow:  0 0 14px rgba(39, 174, 96, 0.35);
+}
+.btn-face.is-ready:hover {
+  background: color-mix(in srgb, var(--clr-ok) 20%, transparent);
+  box-shadow: 0 0 22px rgba(39, 174, 96, 0.55);
+}
+
+.avoid-badge {
+  background:   var(--clr-danger);
+  color:        #fff;
+  font-size:    var(--fs-xs);
+  width:        14px;
+  height:       14px;
+  border-radius:var(--radius-pill);
+  display:      inline-flex;
+  align-items:  center;
+  justify-content: center;
+  font-weight:  800;
+  line-height:  1;
+  transition:   opacity var(--dur-fast);
+}
+/* Keep the badge in flow when hidden so button width never changes */
+.avoid-badge[hidden] {
+  display:        inline-flex !important;
+  visibility:     hidden;
+  opacity:        0;
+  pointer-events: none;
+}
+
+/* Stabilise the face-counter so button width doesn't shift as text changes */
+#face-counter {
+  display:    inline-block;
+  min-width:  4.8rem;
+  text-align: right;
+}
+
+.btn-icon {
+  width:         36px;
+  height:        36px;
+  padding:       0;
+  border-radius: var(--radius-pill);
+  background:    var(--clr-surface-3);
+  color:         var(--clr-text-muted);
+  border:        1px solid var(--clr-border);
+  font-size:     var(--fs-md);
+  font-weight:   700;
+}
+.btn-icon:hover { background: var(--clr-border); color: var(--clr-text); }
+
+.btn-help {
+  padding:       var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-pill);
+  background:    var(--clr-surface-3);
+  color:         var(--clr-text-muted);
+  border:        1px solid var(--clr-border);
+  font-size:     var(--fs-sm);
+  font-weight:   700;
+  white-space:   nowrap;
+}
+.btn-help:hover { background: var(--clr-border); color: var(--clr-text); }
+
+.btn-close {
+  background: transparent;
+  border:     1px solid var(--clr-border);
+  color:      var(--clr-text-muted);
+  font-size:  var(--fs-base);
+}
+.btn-close:hover { background: var(--clr-danger); color: #fff; border-color: var(--clr-danger); }
+
+
+/* ───────────────────────────────────────────────────────────────
+   11. OVERLAYS & DIALOGS (shared)
+─────────────────────────────────────────────────────────────────*/
+.overlay {
+  position:       fixed;
+  inset:          0;
+  background:     rgba(0, 0, 0, 0.75);
+  display:        flex;
+  align-items:    center;
+  justify-content:center;
+  z-index:        500;
+  padding:        var(--sp-5);
+  backdrop-filter: blur(4px);
+  /* Entry animation */
+  animation:      overlay-in var(--dur-base) var(--ease-out) both;
+}
+.overlay[hidden] {
+  display: none;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dialog-box {
+  background:   var(--clr-surface);
+  border:       1px solid var(--clr-border-light);
+  border-radius:var(--radius-xl);
+  box-shadow:   0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px var(--clr-border);
+  max-width:    520px;
+  width:        100%;
+  padding:      var(--sp-6);
+  animation:    dialog-in var(--dur-base) var(--ease-spring) both;
+}
+
+@keyframes dialog-in {
+  from { transform: scale(0.9) translateY(16px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+
+.dialog-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   var(--sp-4);
+}
+
+.dialog-title {
+  font-size:   var(--fs-xl);
+  font-family: var(--font-title);
+  color:       var(--clr-accent);
+}
+
+.dialog-desc {
+  text-align:  center;
+  font-size:   var(--fs-md);
+  color:       var(--clr-text-muted);
+  margin-bottom: var(--sp-4);
+}
+
+.dialog-actions {
+  display:         flex;
+  gap:             var(--sp-3);
+  justify-content: center;
+  margin-top:      var(--sp-5);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   12. HELP MODAL
+─────────────────────────────────────────────────────────────────*/
+.dialog-box--help {
+  max-width:    660px;
+  padding:      var(--sp-5) var(--sp-6);
+}
+
+.help-body {
+  max-height:   60dvh;
+  overflow-y:   auto;
+  padding-right: var(--sp-3);
+  display:       flex;
+  flex-direction:column;
+  gap:           var(--sp-4);
+}
+
+/* Numbered step rows */
+.help-step {
+  display:    flex;
+  gap:        var(--sp-4);
+  align-items:flex-start;
+}
+.help-step-num {
+  flex-shrink:   0;
+  width:         28px;
+  height:        28px;
+  border-radius: var(--radius-pill);
+  background:    var(--clr-accent-glow);
+  border:        1px solid var(--clr-accent-dim);
+  color:         var(--clr-accent);
+  font-weight:   800;
+  font-size:     var(--fs-sm);
+  display:       flex;
+  align-items:   center;
+  justify-content:center;
+  margin-top:    2px;
+}
+.help-step h3 {
+  font-size:     var(--fs-md);
+  color:         var(--clr-text);
+  margin-bottom: var(--sp-1);
+  border:        none;
+  padding:       0;
+  margin-top:    0;
+}
+.help-step p,
+.help-step ul {
+  margin-top: var(--sp-1);
+}
+
+.help-example {
+  font-size:   var(--fs-sm);
+  font-style:  italic;
+  background:  var(--clr-surface-2);
+  border-left: 3px solid var(--clr-accent-dim);
+  padding:     var(--sp-2) var(--sp-3);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color:       var(--clr-text-muted) !important;
+}
+
+.help-sub {
+  font-size:      var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+  border-bottom:  1px solid var(--clr-border);
+  padding-bottom: var(--sp-1);
+}
+
+.help-body h3 {
+  font-size:   var(--fs-md);
+  color:       var(--clr-accent);
+  border-bottom: 1px solid var(--clr-border);
+  padding-bottom: var(--sp-1);
+  margin-top:  var(--sp-3);
+}
+
+.help-body h4 {
+  font-size:   var(--fs-base);
+  color:       var(--clr-text);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  margin-top:  var(--sp-2);
+}
+
+.help-body p {
+  color: var(--clr-text-muted);
+  line-height: 1.6;
+}
+
+.help-body ul {
+  list-style:  disc;
+  padding-left:var(--sp-5);
+  color:       var(--clr-text-muted);
+  display:     flex;
+  flex-direction: column;
+  gap:         var(--sp-1);
+}
+
+.help-table {
+  font-size:    var(--fs-sm);
+  color:        var(--clr-text-muted);
+  border:       1px solid var(--clr-border);
+  border-radius:var(--radius-md);
+  overflow:     hidden;
+}
+.help-table th,
+.help-table td {
+  text-align:   left;
+  padding:      var(--sp-2) var(--sp-3);
+  border-bottom:1px solid var(--clr-border);
+}
+.help-table th {
+  background:   var(--clr-surface-2);
+  color:        var(--clr-text);
+  font-weight:  700;
+}
+.help-table tr:last-child td { border-bottom: none; }
+.help-table td:first-child {
+  font-family: var(--font-mono);
+  color:       var(--clr-accent);
+  font-weight: 700;
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   13. END-GAME DIALOG
+─────────────────────────────────────────────────────────────────*/
+.dialog-box--endgame {
+  text-align: center;
+}
+
+.dialog-box--endgame .dialog-title {
+  font-size:    var(--fs-2xl);
+  margin-bottom:var(--sp-3);
+}
+
+.dialog-box--endgame .dialog-title.win  { color: var(--clr-ok); }
+.dialog-box--endgame .dialog-title.lose { color: var(--clr-danger); }
+
+.dialog-score {
+  display:       flex;
+  flex-direction:column;
+  align-items:   center;
+  gap:           var(--sp-1);
+  margin-block:  var(--sp-5);
+}
+
+.score-label {
+  font-size:      var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--clr-text-muted);
+}
+
+.score-value {
+  font-size:   var(--fs-2xl);
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color:       var(--clr-accent);
+}
+.score-value.negative { color: var(--clr-danger); }
+
+/* Killing card — displayed in the defeat overlay */
+.killing-card-wrap {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--sp-2);
+  margin-top:     var(--sp-2);
+}
+
+.killing-card-label {
+  font-size:      var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--clr-danger);
+  font-weight:    700;
+}
+
+.killing-card {
+  --kc-w: 110px;
+  width:        var(--kc-w);
+  height:       calc(var(--kc-w) * 4 / 3);
+  border-radius:var(--radius-lg);
+  overflow:     hidden;
+  border:       2px solid var(--clr-monster-border);
+  box-shadow:   0 0 24px var(--clr-monster-glow), var(--shadow-card);
+  animation:    dialog-in var(--dur-slow) var(--ease-spring) both;
+}
+
+.killing-card--monster { border-color: var(--clr-monster-border); box-shadow: 0 0 24px var(--clr-monster-glow), var(--shadow-card); }
+
+.killing-card-inner {
+  width:               100%;
+  height:              100%;
+  background-color:    var(--clr-monster-bg);
+  background-size:     cover;
+  background-position: center;
+  position:            relative;
+  display:             flex;
+  align-items:         center;
+  justify-content:     center;
+}
+
+/* Dark gradient so the badge stays readable over the image */
+.killing-card-inner::before {
+  content:       '';
+  position:      absolute;
+  inset:         0;
+  background:    linear-gradient(160deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.55) 100%);
+  pointer-events:none;
+}
+
+.killing-card-inner .card-tl {
+  position:  absolute;
+  top:       var(--sp-1);
+  left:      var(--sp-1);
+  z-index:   1;
+  font-size: var(--fs-sm);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   14. RESPONSIVE BREAKPOINTS
+─────────────────────────────────────────────────────────────────*/
+
+/* ── ≤ 680px: stack the 4-card grid into 2×2 ── */
+@media (max-width: 680px) {
+  :root {
+    --card-w: 155px;
+  }
+
+  .room-grid {
+    grid-template-columns: repeat(2, var(--card-w));
+  }
+
+  /* HUD: tighter padding on small screens */
+  .hud {
+    gap:            var(--sp-2);
+    padding-block:  var(--sp-2);
+    padding-inline: var(--sp-3);
+  }
+
+  /* Compact pill font sizes */
+  .stat-row dt   { font-size: 9px; letter-spacing: 0.04em; }
+  .stat-row dd   { font-size: var(--fs-sm); line-height: 1.1; }
+  .hud-stats     { gap: var(--sp-1); }
+  .hud-stats-row { gap: var(--sp-1); }
+
+  /* Action bar: single row, no wrapping */
+  .action-bar-buttons {
+    flex-wrap: nowrap;
+  }
+  .action-bar-buttons .btn {
+    flex:        1;
+    white-space: nowrap;
+    font-size:   var(--fs-sm);
+  }
+}
+
+/* ── ≤ 400px: single-column cards ── */
+@media (max-width: 400px) {
+  :root {
+    --card-w: 130px;
+  }
+
+  .room-grid {
+    grid-template-columns: repeat(2, var(--card-w));
+  }
+}
+
+/* ── Wide: room centered above log (always column, never side-by-side) ── */
+@media (min-width: 820px) {
+  #main-content {
+    flex-direction: column;
+    align-items:    center;
+    gap:            0;   /* no gap — log gets all freed space */
+  }
+
+  /* Hidden notices collapse to zero on desktop — the log (flex:1)
+     absorbs the change so no layout shift occurs. */
+  .avoid-notice[hidden],
+  .potion-notice[hidden] {
+    height:        0;
+    padding-block: 0;
+    overflow:      hidden;
+  }
+
+  .room-section {
+    width: 100%;
+    align-items: center;
+  }
+
+  .log-section {
+    width:     100%;
+    max-width: 860px;
+    padding-top: var(--sp-2); /* small breathing room above the log heading */
+  }
+  /* No fixed height on log-scroll — flex: 1 from base handles it */
+}
+
+/* ── ≥ 900 px: bigger cards ── */
+@media (min-width: 900px) {
+  :root {
+    --card-w:   200px;
+    --card-gap: var(--sp-4); /* 16px × 3 gaps + 200px × 4 = 848px, fits > 880px */
+  }
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   15. PREFERS-REDUCED-MOTION OVERRIDES
+─────────────────────────────────────────────────────────────────*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:   1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:  1ms !important;
+    scroll-behavior:      auto !important;
+  }
+
+  .card-slot.is-dealing.is-new-deal { animation: none; }
+  .card-slot.is-new-deal.is-flipped .card-inner { animation: none; transition: none; }
+  .card-slot.is-resetting {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .card-slot.is-resetting .card-inner {
+    transition: none;
+  }
+
+  .card-slot.is-flipped .card-inner {
+    transition: none;
+  }
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   16. BUTTON RIPPLE
+─────────────────────────────────────────────────────────────────*/
+.btn-ripple {
+  position:      absolute;
+  border-radius: 50%;
+  background:    rgba(255, 255, 255, 0.18);
+  transform:     scale(0);
+  animation:     btn-ripple-anim 480ms linear forwards;
+  pointer-events:none;
+}
+@keyframes btn-ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   17. PARTICLES
+─────────────────────────────────────────────────────────────────*/
+#particle-container {
+  position:       fixed;
+  inset:          0;
+  pointer-events: none;
+  z-index:        9999;
+  overflow:       hidden;
+}
+
+.particle {
+  position:   absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation:  particle-fly var(--dur-slow, 400ms) ease-out forwards;
+}
+
+@keyframes particle-fly {
+  0%   { transform: translate(0, 0) scale(1);    opacity: 1; }
+  70%  { opacity: 0.7; }
+  100% { transform: translate(var(--pdx), var(--pdy)) scale(0); opacity: 0; }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   18. ACHIEVEMENT TOASTS
+─────────────────────────────────────────────────────────────────*/
+.ach-toast {
+  position:      fixed;
+  bottom:        var(--sp-6);
+  right:         var(--sp-4);
+  display:       flex;
+  align-items:   center;
+  gap:           var(--sp-3);
+  max-width:     340px;
+  padding:       var(--sp-3) var(--sp-4);
+  background:    var(--clr-surface);
+  border:        1px solid var(--clr-accent-dim);
+  border-left:   4px solid var(--clr-accent);
+  border-radius: var(--radius-lg);
+  box-shadow:    0 6px 28px rgba(0,0,0,0.7), 0 0 18px var(--clr-accent-glow);
+  z-index:       8500;
+  transform:     translateX(calc(100% + var(--sp-5)));
+  transition:    transform 380ms var(--ease-spring);
+}
+
+.ach-toast.is-visible {
+  transform: translateX(0);
+}
+
+.ach-toast-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.ach-toast-body {
+  display:        flex;
+  flex-direction: column;
+  gap:            1px;
+  flex:           1;
+  min-width:      0;
+}
+
+.ach-toast-label {
+  font-size:      var(--fs-xs);
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--clr-accent);
+}
+
+.ach-toast-title {
+  font-size:   var(--fs-sm);
+  font-weight: 700;
+  color:       var(--clr-text);
+}
+
+.ach-toast-desc {
+  font-size:  var(--fs-xs);
+  color:      var(--clr-text-muted);
+  white-space:nowrap;
+  overflow:   hidden;
+  text-overflow: ellipsis;
+}
+
+.ach-toast-close {
+  background:    transparent;
+  border:        none;
+  cursor:        pointer;
+  color:         var(--clr-text-muted);
+  font-size:     var(--fs-sm);
+  padding:       2px 4px;
+  border-radius: var(--radius-sm);
+  flex-shrink:   0;
+  align-self:    flex-start;
+}
+.ach-toast-close:hover { color: var(--clr-text); }
+
+/* ───────────────────────────────────────────────────────────────
+   19. ACHIEVEMENTS OVERLAY
+─────────────────────────────────────────────────────────────────*/
+.dialog-box--achievements {
+  max-width:    640px;
+  width:        94vw;
+  max-height:   85vh;
+  overflow-y:   auto;
+}
+
+.ach-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap:                   var(--sp-3);
+  padding-top:           var(--sp-2);
+}
+
+.ach-card {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  text-align:     center;
+  gap:            var(--sp-1);
+  padding:        var(--sp-3) var(--sp-3);
+  border-radius:  var(--radius-md);
+  border:         1px solid var(--clr-border);
+  background:     var(--clr-surface-2);
+  transition:     border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.ach-card--won {
+  border-color: var(--clr-accent-dim);
+  box-shadow:   0 0 10px var(--clr-accent-glow);
+}
+
+.ach-card--locked {
+  opacity: 0.45;
+}
+
+.ach-card-icon {
+  font-size:   1.8rem;
+  line-height: 1;
+}
+
+.ach-card-title {
+  font-size:   var(--fs-sm);
+  font-weight: 700;
+  color:       var(--clr-text);
+}
+
+.ach-card-desc {
+  font-size: var(--fs-xs);
+  color:     var(--clr-text-muted);
+  line-height: 1.35;
+}
+
+.ach-card-date {
+  font-size: var(--fs-xs);
+  color:     var(--clr-accent-dim);
+  margin-top:var(--sp-1);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   20. LEADERBOARD OVERLAY
+─────────────────────────────────────────────────────────────────*/
+.dialog-box--leaderboard {
+  max-width: 560px;
+  width:     92vw;
+}
+
+/* Parchment-esque accent line */
+.dialog-box--leaderboard .dialog-title::before {
+  content:       '⚔️ ';
+}
+.dialog-box--leaderboard .dialog-title::after {
+  content:       ' ⚔️';
+}
+
+.lb-list {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-2);
+  margin-top:     var(--sp-3);
+}
+
+.lb-entry {
+  display:       grid;
+  grid-template-columns: 2rem 1fr auto auto auto;
+  align-items:   center;
+  gap:           var(--sp-3);
+  padding:       var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  background:    var(--clr-surface-2);
+  border:        1px solid var(--clr-border);
+  font-size:     var(--fs-sm);
+  transition:    border-color var(--dur-fast);
+}
+
+.lb-entry--win {
+  border-color: color-mix(in srgb, var(--clr-ok) 40%, transparent);
+}
+
+.lb-entry--lose {
+  border-color: color-mix(in srgb, var(--clr-danger) 25%, transparent);
+}
+
+.lb-rank {
+  font-size:   1.2rem;
+  text-align:  center;
+  line-height: 1;
+}
+
+.lb-num {
+  font-size:   var(--fs-xs);
+  color:       var(--clr-text-muted);
+  font-weight: 700;
+}
+
+.lb-badge {
+  font-size:     var(--fs-xs);
+  font-weight:   700;
+  padding:       1px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.lb-badge--win  {
+  color:       var(--clr-ok);
+  background:  color-mix(in srgb, var(--clr-ok) 12%, transparent);
+  border:      1px solid color-mix(in srgb, var(--clr-ok) 30%, transparent);
+}
+
+.lb-badge--lose {
+  color:       var(--clr-danger);
+  background:  color-mix(in srgb, var(--clr-danger) 12%, transparent);
+  border:      1px solid color-mix(in srgb, var(--clr-danger) 30%, transparent);
+}
+
+.lb-score {
+  font-size:   var(--fs-sm);
+  font-weight: 700;
+  color:       var(--clr-accent);
+  font-family: var(--font-mono);
+  min-width:   2.8rem;
+  text-align:  right;
+}
+
+.lb-score--neg { color: var(--clr-danger); }
+
+.lb-turns {
+  font-size: var(--fs-xs);
+  color:     var(--clr-text-muted);
+  min-width: 4rem;
+  text-align:right;
+}
+
+.lb-date {
+  font-size: var(--fs-xs);
+  color:     var(--clr-text-dim);
+  min-width: 4rem;
+  text-align:right;
+}
+
+.lb-empty {
+  text-align: center;
+  color:      var(--clr-text-muted);
+  font-style: italic;
+  padding:    var(--sp-5);
+}
+
+/* ── Mute button ── */
+.btn-mute {
+  font-size:   1.1rem;
+  padding:     var(--sp-1) var(--sp-2);
+  background:  transparent;
+  border:      1px solid var(--clr-border);
+  color:       var(--clr-text-muted);
+  line-height: 1;
+}
+.btn-mute:hover { background: var(--clr-border); color: var(--clr-text); }
+
+/* ════════════════════════════════════════════════════════════
+   §21 — SETTINGS BUTTON
+════════════════════════════════════════════════════════════ */
+.btn-settings {
+  font-size:   1.1rem;
+  padding:     var(--sp-1) var(--sp-2);
+  background:  transparent;
+  border:      1px solid var(--clr-border);
+  color:       var(--clr-text-muted);
+  line-height: 1;
+}
+.btn-settings:hover { background: var(--clr-border); color: var(--clr-text); }
+
+/* ════════════════════════════════════════════════════════════
+   §22 — STATUS BAR (save indicator + resume banner)
+════════════════════════════════════════════════════════════ */
+.status-bar {
+  display:    none; /* save-indicator repositioned as absolute overlay — no flow space used */
+}
+
+.save-indicator {
+  position:        fixed;  /* float in corner; no flow space taken */
+  bottom:          var(--sp-3);
+  right:           var(--sp-3);
+  z-index:         200;
+  font-size:       var(--fs-xs);
+  color:           var(--clr-text-muted);
+  background:      color-mix(in srgb, var(--clr-surface) 90%, transparent);
+  padding:         0.15rem var(--sp-2);
+  border-radius:   var(--radius-sm);
+  opacity:         0;
+  pointer-events:  none;
+  user-select:     none;
+}
+.save-indicator.is-saving {
+  animation: save-flash 1.8s ease-out forwards;
+}
+@keyframes save-flash {
+  0%   { opacity: 0.9; }
+  60%  { opacity: 0.6; }
+  100% { opacity: 0;   }
+}
+
+.resume-banner {
+  font-size:     var(--fs-xs);
+  color:         var(--clr-weapon);
+  background:    color-mix(in srgb, var(--clr-weapon) 12%, transparent);
+  border:        1px solid color-mix(in srgb, var(--clr-weapon) 35%, transparent);
+  border-radius: var(--radius-pill);
+  padding:       0.15rem var(--sp-3);
+  animation:     overlay-in 0.3s var(--ease-spring) both;
+}
+.resume-banner[hidden] { display: none; }
+
+/* ════════════════════════════════════════════════════════════
+   §23 — ONBOARDING OVERLAY
+════════════════════════════════════════════════════════════ */
+.dialog-box--onboarding {
+  max-width:  440px;
+  text-align: center;
+}
+
+.onboard-sigil {
+  font-size:     2.8rem;
+  line-height:   1;
+  margin-bottom: var(--sp-2);
+  filter: drop-shadow(0 0 12px rgba(197,153,83,.55));
+  animation:     card-pop 0.5s var(--ease-spring) both;
+}
+
+.dialog-desc {
+  color:         var(--clr-text-muted);
+  font-size:     var(--fs-sm);
+  margin-bottom: var(--sp-4);
+}
+
+.onboard-features {
+  list-style:    none;
+  padding:       0;
+  margin:        0 0 var(--sp-5);
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--sp-2);
+  text-align:    left;
+}
+.onboard-features li {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-3);
+  font-size:   var(--fs-sm);
+  color:       var(--clr-text-muted);
+}
+.onboard-icon {
+  font-size:   1.3rem;
+  flex-shrink: 0;
+  width:       2rem;
+  text-align:  center;
+}
+
+.onboard-hint {
+  font-size:    var(--fs-xs);
+  color:        var(--clr-text-muted);
+  margin-top:   var(--sp-3);
+  opacity:      0.7;
+}
+.onboard-hint kbd {
+  display:          inline-block;
+  padding:          0.1em 0.4em;
+  font-size:        0.85em;
+  font-family:      monospace;
+  background:       var(--clr-bg-card);
+  border:           1px solid var(--clr-border);
+  border-radius:    4px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   §24 — SETTINGS OVERLAY
+════════════════════════════════════════════════════════════ */
+.dialog-box--settings {
+  max-width: 380px;
+  width: 100%;
+}
+
+.settings-body {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-1);
+  padding-top:    var(--sp-2);
+}
+
+.settings-row {
+  display:        flex;
+  justify-content: space-between;
+  align-items:    center;
+  padding:        var(--sp-3) var(--sp-2);
+  border-radius:  var(--radius-sm);
+  transition:     background 0.15s;
+}
+.settings-row:hover { background: rgba(255,255,255,0.03); }
+.settings-row--danger .btn-danger { align-self: center; }
+
+.settings-label {
+  display:     flex;
+  gap:         var(--sp-3);
+  align-items: center;
+  cursor:      default;
+}
+.settings-label-icon {
+  font-size:   1.3rem;
+  flex-shrink: 0;
+  width:       1.8rem;
+  text-align:  center;
+}
+.settings-label-text {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+}
+.settings-label-text strong {
+  font-size:   var(--fs-sm);
+  font-weight: 600;
+  color:       var(--clr-text);
+}
+.settings-label-text small {
+  font-size:   var(--fs-xs);
+  color:       var(--clr-text-muted);
+  font-weight: 400;
+}
+
+.settings-divider {
+  border:     none;
+  border-top: 1px solid var(--clr-border);
+  margin:     var(--sp-1) 0;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position:   relative;
+  display:    inline-block;
+  width:      2.6rem;
+  height:     1.5rem;
+  flex-shrink: 0;
+  cursor:     pointer;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  position:      absolute;
+  inset:         0;
+  background:    var(--clr-border);
+  border-radius: var(--radius-pill);
+  transition:    background 0.2s;
+}
+.toggle-track::before {
+  content:       '';
+  position:      absolute;
+  left:          3px;
+  top:           50%;
+  transform:     translateY(-50%);
+  width:         1rem;
+  height:        1rem;
+  background:    #fff;
+  border-radius: 50%;
+  transition:    left 0.2s var(--ease-spring);
+}
+.toggle-switch input:checked + .toggle-track {
+  background: var(--clr-accent);
+}
+.toggle-switch input:checked + .toggle-track::before {
+  left: calc(100% - 3px - 1rem);
+}
+.toggle-switch input:focus-visible + .toggle-track {
+  outline:        2px solid var(--clr-accent);
+  outline-offset: 2px;
+}
+
+/* Danger button */
+.btn-danger {
+  background:    transparent;
+  border:        1px solid color-mix(in srgb, #e05 30%, transparent);
+  color:         color-mix(in srgb, #e05 80%, var(--clr-text));
+  font-size:     var(--fs-xs);
+  padding:       var(--sp-1) var(--sp-3);
+  border-radius: var(--radius-sm);
+  transition:    background 0.15s, border-color 0.15s;
+}
+.btn-danger:hover {
+  background:    color-mix(in srgb, #e05 12%, transparent);
+  border-color:  color-mix(in srgb, #e05 55%, transparent);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   §25 — TOUCH & MOBILE IMPROVEMENTS
+════════════════════════════════════════════════════════════ */
+
+/* Eliminate 300 ms tap delay on all interactive elements */
+.btn,
+.card-slot,
+.card-front,
+input[type="range"],
+input[type="checkbox"],
+label {
+  touch-action: manipulation;
+}
+
+/* Minimum 44 × 44 px touch targets (WCAG 2.5.5) */
+.btn      { min-height: 44px; }
+.btn-icon { min-width: 44px; min-height: 44px; }
+
+/* Active tap feedback on cards (hover doesn't fire reliably on mobile) */
+.card-front:active {
+  opacity: 0.82;
+  transition: opacity 60ms;
+}
+
+/* ── Sticky action bar on mobile ──────────────────────────── */
+@media (max-width: 680px) {
+  /* Restore page scroll on mobile — cards + log scroll together */
+  body { overflow-y: auto; }
+  .app  { height: auto; min-height: 100dvh; overflow: visible; }
+  #main-content { min-height: unset; }
+
+  .avoid-bar {
+    position:   sticky;
+    bottom:     env(safe-area-inset-bottom, 0px);
+    background: var(--clr-bg);
+    padding:    var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--clr-border);
+    z-index:    100;
+    margin-inline: calc(-1 * var(--sp-4));
+  }
+
+  /* Wider hit area for buttons in the bar */
+  .action-bar-buttons .btn {
+    flex:       1;
+    min-height: 52px;
+    font-size:  var(--fs-sm);
+  }
+
+  /* Face button: stack label + counter vertically, both centred */
+  .btn-face {
+    min-width:      0;
+    flex-direction: column;
+    gap:            0;
+    line-height:    1.2;
+    padding-block:  var(--sp-1);
+  }
+  #face-counter {
+    min-width:   auto;
+    font-size:   var(--fs-xs);
+    font-weight: 400;
+    opacity:     0.8;
+  }
+
+  /* Card tap: stronger visual feedback on small screens */
+  .card-slot { -webkit-tap-highlight-color: transparent; }
+
+  /* Log: fixed height on mobile (page scrolls, no viewport flex there) */
+  .log-scroll { flex: none; height: 200px; }
+
+  /* Hide hint text on mobile — swipe hint serves that purpose */
+  .room-hint { display: none; }
+
+  /* HUD blocks: smaller font to prevent overflow */
+  .hud-value     { font-size: var(--fs-sm); }
+  .hud-sub-value { font-size: var(--fs-xs); }
+}
+
+/* ── 360 px phones: keep cards readable ─────────────────── */
+@media (max-width: 360px) {
+  :root { --card-w: 128px; --card-gap: var(--sp-2); }
+  .room-grid  { gap: var(--sp-2); }
+  .hud-label  { display: none; }  /* hide labels to save space */
+}
+
+/* ── Landscape on small phones ───────────────────────────── */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root { --card-w: 90px; }
+  .hud          { padding-block: var(--sp-1); }
+  .log-scroll   { flex: none; height: 80px; }
+  .room-grid    { gap: var(--sp-2); }
+  .hud-controls { display: none; }  /* hide controls row in landscape; use hud-toggle */
+}
+
+/* Safe area insets for notched / gesture-bar phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ── Swipe hint (mobile only, shown once via JS) ─────────── */
+.swipe-hint {
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  gap:         var(--sp-2);
+  font-size:   var(--fs-xs);
+  color:       var(--clr-text-muted);
+  background:  color-mix(in srgb, var(--clr-surface-2) 85%, transparent);
+  border:      1px solid var(--clr-border);
+  border-radius: var(--radius-pill);
+  padding:     var(--sp-1) var(--sp-4);
+  margin-top:  var(--sp-2);
+  animation:   overlay-in 0.4s var(--ease-out) both;
+  cursor:      pointer;
+  user-select: none;
+}
+.swipe-hint[hidden] { display: none; }
+
+/* Only show swipe hint on touch devices */
+@media (hover: hover) {
+  .swipe-hint { display: none !important; }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   §26 — VOLUME SLIDERS (Settings panel)
+════════════════════════════════════════════════════════════ */
+
+/* Slim settings row for sliders (less vertical padding than toggle rows) */
+.settings-row--slim {
+  padding-block: var(--sp-1) var(--sp-2);
+  padding-inline: var(--sp-2);
+  gap:           var(--sp-3);
+  align-items:   center;
+  display:       flex;
+}
+
+.settings-vol-label {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-2);
+  font-size:   var(--fs-xs);
+  color:       var(--clr-text-muted);
+  min-width:   3.8rem;
+  white-space: nowrap;
+}
+
+/* Range input — cross-browser styled */
+.vol-slider {
+  flex:          1;
+  -webkit-appearance: none;
+  appearance:    none;
+  height:        4px;
+  border-radius: var(--radius-pill);
+  background:    var(--clr-border);
+  outline:       none;
+  cursor:        pointer;
+  transition:    background var(--dur-fast);
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width:         16px;
+  height:        16px;
+  border-radius: 50%;
+  background:    var(--clr-accent);
+  border:        2px solid var(--clr-bg);
+  cursor:        pointer;
+  box-shadow:    0 0 4px rgba(0,0,0,0.4);
+  transition:    transform var(--dur-fast);
+}
+.vol-slider::-webkit-slider-thumb:hover,
+.vol-slider::-webkit-slider-thumb:active {
+  transform: scale(1.25);
+}
+.vol-slider::-moz-range-thumb {
+  width:         16px;
+  height:        16px;
+  border-radius: 50%;
+  background:    var(--clr-accent);
+  border:        2px solid var(--clr-bg);
+  cursor:        pointer;
+}
+.vol-slider:focus-visible {
+  outline:        2px solid var(--clr-accent);
+  outline-offset: 4px;
+  border-radius:  var(--radius-pill);
+}
+
+/* Numeric output badge */
+.vol-output {
+  font-size:    var(--fs-xs);
+  font-family:  var(--font-mono);
+  color:        var(--clr-text-muted);
+  min-width:    2.2rem;
+  text-align:   right;
+}
+.vol-output::after { content: '%'; }
+
+/* Make settings dialog a bit wider to fit sliders */
+.dialog-box--settings { max-width: 420px; }
+
